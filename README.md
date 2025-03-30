@@ -1,4 +1,4 @@
-<h1 style="text-align: center;"><a href="https://casperlabs.io/"><img src="https://raw.githubusercontent.com/gRoussac/casper-deployer/dev/www/apps/frontend/src/assets/logo.png" width="120" style="position: relative; top:5px" alt="Casper"></a> <b>Deployer</b> - Information and How-To Guides</h1>
+<h1 style="text-align: center;"><a href="https://casperlabs.io/"><img src="https://raw.githubusercontent.com/gRoussac/casper-deployer/dev/www/apps/frontend/src/assets/logo.svg" width="120" style="position: relative; top:5px" alt="Casper"></a> <b>Deployer</b> - Information and How-To Guides</h1>
 <br>
 
 # Welcome to **Casper Deployer**!
