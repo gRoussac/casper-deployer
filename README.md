@@ -175,13 +175,12 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
 - [✓] Add Dictionnary implementation to test smart contracts
 - [✓] Add some RPC calls into wasm client side (Rust SDK)
 - [✓] Add Events watchers
-- [ ] Re implement Events watchers from the Rust SDK
-- [ ] Casper wallet integration / private key / deprecate Casper Signer
-- [ ] Whitelist Signer on casper.onrender.com
-- [ ] Fix Github workflow
+- [✓] Re implement Events watchers from the Rust SDK
+- [✓] Casper wallet integration / private key / deprecate Casper Signer
+- [✓] Fix Github workflow
 - [ ] Fix blur events on input
 - [ ] Fix UI height
-- [ ] Refactor Angular froms building
+- [ ] Refactor Angular forms building
 - [ ] Improve Jest coverage
 - [ ] Improve Cypress coverage
 - [ ] Add Cypress coverage Github action
