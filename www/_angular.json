@@ -23,6 +23,7 @@
     "util-services-storage": "libs/util/services/storage",
     "util-services-toaster": "libs/util/services/toaster",
     "util-services-wasm": "libs/util/services/wasm",
-    "util-services-watcher": "libs/util/services/watcher"
+    "util-services-watcher": "libs/util/services/watcher",
+    "util-services-wallet": "libs/util/services/wallet"
   }
 }

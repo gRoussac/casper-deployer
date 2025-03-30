@@ -1,11 +1,12 @@
 {
   "name": "casper-rust-wasm-sdk",
+  "type": "module",
   "description": "Casper Rust Wasm Web SDK",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/casper-ecosystem/rustSDK"
+    "url": "https://github.com/casper-ecosystem/casper-rust-wasm-sdk"
   },
   "files": [
     "casper_rust_wasm_sdk_bg.wasm",
@@ -13,8 +14,11 @@
     "casper_rust_wasm_sdk.d.ts"
   ],
   "main": "casper_rust_wasm_sdk.js",
-  "homepage": "https://casperlabs.io",
+  "homepage": "https://www.casper.network",
   "types": "casper_rust_wasm_sdk.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
   "keywords": [
     "casper",
     "sdk",

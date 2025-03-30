@@ -41,7 +41,8 @@
       "@casper-util/toaster": ["libs/util/services/toaster/src/index.ts"],
       "@casper-util/tokens": ["libs/util/tokens/src/index.ts"],
       "@casper-util/wasm": ["libs/util/services/wasm/src/index.ts"],
-      "@casper-util/watcher": ["libs/util/services/watcher/src/index.ts"]
+      "@casper-util/watcher": ["libs/util/services/watcher/src/index.ts"],
+      "@casper-util/wallet": ["libs/util/services/wallet/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

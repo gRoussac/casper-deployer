@@ -4,12 +4,9 @@ import { HighlightService } from '@casper-util/hightlight-webworker';
 import { Subject } from 'rxjs';
 import { Result } from './result';
 
-@Injectable({
-  providedIn: null
-})
+@Injectable()
 export class ResultService {
-
-  private readonly result = new Subject<Result>;
+  private readonly result = new Subject<Result>();
   private window!: (Window & typeof globalThis) | null;
 
   constructor(
@@ -25,19 +22,18 @@ export class ResultService {
 
   async setResult<T>(title: string, result: object | string) {
     const res = result as T;
-    const resultHtml = await this.highlightService.highlightMessage<T>(
-      res
-    );
+    const resultHtml = await this.highlightService.highlightMessage<T>(res);
     const isString = typeof result === 'string';
     this.result.next({
       title,
-      result: isString ? res as string : JSON.stringify(res),
-      resultHtml: isString ? res as string : resultHtml,
+      result: isString ? (res as string) : JSON.stringify(res),
+      resultHtml: isString ? (res as string) : resultHtml,
     });
   }
 
   copyClipboard(value: string) {
-    this.window?.navigator.clipboard.writeText(value).catch(e => console.error(e));
+    this.window?.navigator.clipboard
+      .writeText(value)
+      .catch((e) => console.error(e));
   }
-
 }

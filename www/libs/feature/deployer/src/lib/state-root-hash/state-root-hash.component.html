@@ -10,9 +10,7 @@
       </label>
       <div class="mb-2">
         <input
-          [ngClass]="{
-            'empty:bg-red-200': apiUrlElt.value === ''
-          }"
+          [ngClass]="{ 'empty:bg-red-200': apiUrlElt.value === '' }"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           name="apiUrl"
           #apiUrlElt

@@ -1,4 +1,4 @@
-import { SDK, Verbosity } from 'casper-sdk-nodejs';
+import { SDK, Verbosity } from 'casper-rust-wasm-sdk-nodejs';
 import { UrlService } from '../util/url/url.service';
 import { Injectable } from '@nestjs/common';
 
@@ -8,9 +8,7 @@ export class SDKService {
   private casperSDK!: SDK;
   private verbosity: Verbosity.Low;
 
-  constructor(
-    private readonly urlService: UrlService
-  ) { }
+  constructor(private readonly urlService: UrlService) {}
 
   getCasperSDK(node_address: string) {
     if (node_address && this.node_address === node_address) {

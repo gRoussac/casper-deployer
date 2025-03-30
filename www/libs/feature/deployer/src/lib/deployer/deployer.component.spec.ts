@@ -9,6 +9,12 @@ import { TOASTER_TOKEN } from '@casper-util/toaster';
 import { DEPLOYER_TOKEN, SDK_TOKEN } from '@casper-util/wasm';
 import { Peer } from '@casper-api/api-interfaces';
 
+jest.mock('casper-rust-wasm-sdk', () => ({
+  CLType: jest
+    .fn()
+    .mockImplementation(() => ({ U8: jest.fn().mockResolvedValue('U8') })),
+}));
+
 describe('DeployerComponent', () => {
   let component: DeployerComponent;
   let fixture: ComponentFixture<DeployerComponent>;
@@ -17,50 +23,28 @@ describe('DeployerComponent', () => {
   const address = '127.0.0.1';
   const node_id = test;
   const api_version = test;
-  const peers: Peer[] = [{
-    address,
-    node_id
-  }];
-  const getPeersResult = {
-    api_version,
-    peers
-  };
-  const getStatusResult = {
-    api_version,
-    peers: undefined
-  };
+  const peers: Peer[] = [{ address, node_id }];
+  const getPeersResult = { api_version, peers };
+  const getStatusResult = { api_version, peers: undefined };
   const setState = jest.fn();
   const getPeers = jest.fn().mockResolvedValue(getPeersResult);
   const getStatus = jest.fn().mockResolvedValue(getStatusResult);
 
-  const getCasperSDK = jest.fn().mockReturnValue({
-    get_peers: getPeers,
-    get_node_status: getStatus
-  });
+  const getCasperSDK = jest
+    .fn()
+    .mockReturnValue({ get_peers: getPeers, get_node_status: getStatus });
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DeployerComponent, HttpClientModule],
       providers: [
         RouteurHubService,
-        {
-          provide: ENV_CONFIG, useValue: config
-        },
-        {
-          provide: SDK_TOKEN, useValue: getCasperSDK
-        },
-        {
-          provide: DeployerService, useValue: {
-            setState,
-          }
-        },
-        {
-          provide: TOASTER_TOKEN, useValue: {},
-        },
-        {
-          provide: DEPLOYER_TOKEN, useValue: {},
-        },
+        { provide: ENV_CONFIG, useValue: config },
+        { provide: SDK_TOKEN, useValue: getCasperSDK },
+        { provide: DeployerService, useValue: { setState } },
+        { provide: TOASTER_TOKEN, useValue: {} },
+        { provide: DEPLOYER_TOKEN, useValue: {} },
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeployerComponent);

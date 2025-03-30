@@ -12,13 +12,7 @@ describe('ArgBuilderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ArgBuilderComponent],
-      providers: [
-        {
-          provide: DeployerService, useValue: {
-            getState,
-          }
-        },
-      ]
+      providers: [{ provide: DeployerService, useValue: { getState } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ArgBuilderComponent);

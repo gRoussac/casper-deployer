@@ -1,0 +1,31 @@
+{
+  "name": "util-services-wallet",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/util/services/wallet/src",
+  "prefix": "www",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/util/services/wallet"
+      ],
+      "options": {
+        "jestConfig": "libs/util/services/wallet/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/util/services/wallet/**/*.ts",
+          "libs/util/services/wallet/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "util wallet"
+  ]
+}

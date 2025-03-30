@@ -21,7 +21,7 @@ impl Deployer {
     pub fn hello(&mut self) -> String {
         let greetings = "Hello Web Assembly! My Name is Greg, I am glad you are looking under the hood, found any bug ? having an error log ? please kindly contact me on github at https://github.com/gRoussac/casper-deployer-hackathon-oct-2022 or per email at ".to_string();
         log(greetings);
-        log(atob("Z3JlZ29yeUBjYXNwZXJsYWJzLmlv".to_string())
+        log(atob("Z3JlZ29yeUBpbnRlcmNob3VldHRlLm5ldA==".to_string())
             .as_string()
             .unwrap());
         "Greetings in return!".to_string()

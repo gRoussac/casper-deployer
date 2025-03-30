@@ -4,25 +4,19 @@ import { HIGHLIGHT_WEBWORKER_FACTORY } from './util-hihlight-webworker.token';
 
 describe('HighlightService', () => {
   let service: HighlightService;
-  const test = 'test', postMessage = jest.fn().mockResolvedValue(test),
-    webWorker = {
-      terminate: jest.fn()
-    },
-    promiseWorker = {
-      postMessage
-    };
+  const test = 'test',
+    postMessage = jest.fn().mockResolvedValue(test),
+    webWorker = { terminate: jest.fn() },
+    promiseWorker = { postMessage };
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        HighlightService,
         {
-          provide: HIGHLIGHT_WEBWORKER_FACTORY, useValue: jest.fn().mockReturnValue(
-            [
-              webWorker,
-              promiseWorker
-            ]
-          )
+          provide: HIGHLIGHT_WEBWORKER_FACTORY,
+          useValue: jest.fn().mockReturnValue([webWorker, promiseWorker]),
         },
-      ]
+      ],
     });
     service = TestBed.inject(HighlightService);
   });

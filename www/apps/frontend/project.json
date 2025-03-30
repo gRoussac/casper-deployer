@@ -28,7 +28,7 @@
             "output": "assets"
           },
           {
-            "input": "../casper-sdk/pkg",
+            "input": "../casper-rust-wasm-sdk/pkg",
             "glob": "casper_rust_wasm_sdk_bg.wasm",
             "output": "assets"
           }
@@ -42,7 +42,6 @@
           "./node_modules/toastr/build/toastr.min.js"
         ],
         "allowedCommonJsDependencies": [
-          "casper-js-sdk",
           "promise-worker"
         ]
       },
@@ -83,10 +82,12 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "frontend:build:production"
+          "buildTarget": "frontend:build:production",
+          "port": 8080
         },
         "development": {
-          "buildTarget": "frontend:build:development"
+          "buildTarget": "frontend:build:development",
+          "port": 4242
         }
       },
       "defaultConfiguration": "development",

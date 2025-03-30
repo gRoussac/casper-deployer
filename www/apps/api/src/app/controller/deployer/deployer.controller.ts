@@ -1,15 +1,16 @@
 import { api_interface, DeployReturn, Peer } from '@casper-api/api-interfaces';
 import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { AppService } from '../../app.service';
-import { Deploy, GetDeployResult } from 'casper-sdk-nodejs';
+import { Deploy, GetDeployResult } from 'casper-rust-wasm-sdk-nodejs';
 
 @Controller(api_interface.Deployer)
 export class DeployerController {
-
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get(api_interface.GetStateRootHash)
-  async getStateRootHash(@Query('apiUrl') apiUrl?: string): Promise<string | Error> {
+  async getStateRootHash(
+    @Query('apiUrl') apiUrl?: string,
+  ): Promise<string | Error> {
     try {
       const stringify = true;
       return await this.appService.getStateRootHash(apiUrl, stringify);
@@ -39,8 +40,7 @@ export class DeployerController {
   @Get(api_interface.PurseURef)
   async getPurseURef(
     @Query('publicKey') publicKey?: string,
-    @Query('apiUrl') apiUrl?: string
-
+    @Query('apiUrl') apiUrl?: string,
   ): Promise<string | Error> {
     try {
       const stringify = true;
@@ -55,11 +55,15 @@ export class DeployerController {
     @Query('stateRootHash') stateRootHash: string,
     @Query('key') key: string,
     @Query('path') path?: string,
-    @Query('apiUrl') apiUrl?: string
-
+    @Query('apiUrl') apiUrl?: string,
   ): Promise<object | Error> {
     try {
-      return await this.appService.getBlockState(stateRootHash, key, path && JSON.parse(path), apiUrl);
+      return await this.appService.getBlockState(
+        stateRootHash,
+        key,
+        path && JSON.parse(path),
+        apiUrl,
+      );
     } catch (error) {
       return { name: error.toString(), message: error };
     }
@@ -73,7 +77,14 @@ export class DeployerController {
   ): Promise<string | Error> {
     try {
       const stringify = true;
-      return (await this.appService.getBalance(stateRootHash, purseURef, apiUrl, stringify)).toString();
+      return (
+        await this.appService.getBalance(
+          stateRootHash,
+          purseURef,
+          apiUrl,
+          stringify,
+        )
+      ).toString();
     } catch (error) {
       return { name: error.toString(), message: error };
     }
@@ -86,7 +97,13 @@ export class DeployerController {
   ): Promise<string | Error> {
     try {
       const stringify = true;
-      return (await this.appService.getBalanceOfByPublicKey(publicKey, apiUrl, stringify)).toString();
+      return (
+        await this.appService.getBalanceOfByPublicKey(
+          publicKey,
+          apiUrl,
+          stringify,
+        )
+      ).toString();
     } catch (error) {
       return { name: error.toString(), message: error };
     }
@@ -135,9 +152,20 @@ export class DeployerController {
   ): Promise<object | Error> {
     try {
       if (seedUref) {
-        return await this.appService.getDictionaryItemByURef(stateRootHash, dictionaryItemKey, seedUref, apiUrl);
+        return await this.appService.getDictionaryItemByURef(
+          stateRootHash,
+          dictionaryItemKey,
+          seedUref,
+          apiUrl,
+        );
       }
-      return await this.appService.getDictionaryItemByName(stateRootHash, contractHash, dictionaryName, dictionaryItemKey, apiUrl);
+      return await this.appService.getDictionaryItemByName(
+        stateRootHash,
+        contractHash,
+        dictionaryName,
+        dictionaryItemKey,
+        apiUrl,
+      );
     } catch (error) {
       return { name: error.toString(), message: error };
     }

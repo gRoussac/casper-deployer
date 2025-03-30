@@ -11,7 +11,7 @@ wasm-bindgen-futures = "*"
 wee_alloc = "*"
 casper-types = { version = "4.0.1", default-features = false }
 js-sys = "*"
-base64 = { version = "0.21.2", default-features = false, features = ["alloc"] }
+base64 = { version = "0.22.1", default-features = false, features = ["alloc"] }
 getrandom = { version = "0.2.10", features = ["js"] }
 
 [lib]

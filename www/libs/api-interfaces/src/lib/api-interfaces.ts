@@ -1,5 +1,5 @@
-import { Roles } from "./api-enums";
-import { CLType } from 'casper-sdk';
+import { Roles } from './api-enums';
+import { CLType } from 'casper-rust-wasm-sdk';
 
 export type NamedCLTypeArg = {
   name: string;
@@ -11,22 +11,13 @@ export type NamedCLTypeArg = {
   optional?: boolean;
 };
 
-export type User = {
-  role?: Roles;
-  activePublicKey: string;
-};
+export type User = { role?: Roles; activePublicKey: string };
 
 export type Users = User[];
 
-export type Error = {
-  name: string;
-  message: string;
-};
+export type Error = { name: string; message: string };
 
-export type Peer = {
-  node_id: string;
-  address: string;
-};
+export type Peer = { node_id: string; address: string };
 
 export type State = {
   apiUrl?: string;
@@ -48,6 +39,4 @@ export type State = {
   has_wasm?: boolean;
 };
 
-export type DeployReturn = {
-  deploy_hash: string;
-};
+export type DeployReturn = { deploy_hash: string };

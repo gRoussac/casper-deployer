@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { environment } from '../../environments/environment';
 
 @Injectable()
 export class UrlService {
@@ -14,13 +13,12 @@ export class UrlService {
   }
 
   shortUrl(url_test: string): string {
-    url_test = url_test ? url_test : environment.apiUrl;
     let url: URL;
     try {
       url = new URL(url_test);
     } catch (_) {
       return url_test;
     }
-    return (url.origin + url.pathname).replace(/\/$/, '');;
+    return (url.origin + url.pathname).replace(/\/$/, '');
   }
 }

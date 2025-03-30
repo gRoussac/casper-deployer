@@ -9,6 +9,16 @@ export default {
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
+        astTransformers: {
+          before: [
+            {
+              path: 'ts-jest-mock-import-meta',
+              options: {
+                metaObjectReplacement: { url: 'https://www.url.com' },
+              },
+            },
+          ],
+        },
       },
     ],
   },

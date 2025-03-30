@@ -1,4 +1,14 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Tabs, TabsComponent } from '@casper-ui/tabs';
 import { ArgumentComponent } from '@casper-ui/argument';
@@ -7,8 +17,7 @@ import { StorageService } from '@casper-util/storage';
 import { NamedCLTypeArg, State } from '@casper-api/api-interfaces';
 import { DeployerService } from '@casper-data/data-access-deployer';
 import { Subscription } from 'rxjs';
-import { CLType } from 'casper-sdk';
-
+import { CLType } from 'casper-rust-wasm-sdk';
 
 interface ArgumentEntry<T = unknown> {
   name: string;
@@ -22,15 +31,9 @@ interface TypeObject {
   Tuple1?: string[];
   Tuple2?: string[];
   Tuple3?: string[];
-  Map?: {
-    key: string;
-    value: string;
-  };
+  Map?: { key: string; value: string };
   ByteArray?: number;
-  Result?: {
-    ok: string;
-    err: string;
-  };
+  Result?: { ok: string; err: string };
 }
 
 const sortByName = (a: NamedCLTypeArg, b: NamedCLTypeArg) => {
@@ -38,8 +41,7 @@ const sortByName = (a: NamedCLTypeArg, b: NamedCLTypeArg) => {
   const typeB = b['name'].toString().toUpperCase();
   if (typeA < typeB) {
     return -1;
-  }
-  else if (typeA > typeB) {
+  } else if (typeA > typeB) {
     return 1;
   }
   return 0;
@@ -69,9 +71,9 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
   Tabs = Tabs;
   default = Tabs.Custom;
   active: Tabs = this.default;
-  defaultTabs = defaultTabs.map(tab => ({
+  defaultTabs = defaultTabs.map((tab) => ({
     name: tab.name,
-    types: tab.types.slice().sort(sortByName)
+    types: tab.types.slice().sort(sortByName),
   }));
   argument = '';
   hasWasm!: boolean;
@@ -81,15 +83,17 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private readonly storageService: StorageService,
-    private readonly deployerService: DeployerService
-  ) { }
+    private readonly deployerService: DeployerService,
+  ) {}
 
   ngAfterViewInit(): void {
-    this.getStateSubscription = this.deployerService.getState().subscribe((state: State) => {
-      if (undefined !== state.has_wasm) {
-        this.hasWasm = !!state.has_wasm;
-      }
-    });
+    this.getStateSubscription = this.deployerService
+      .getState()
+      .subscribe((state: State) => {
+        if (undefined !== state.has_wasm) {
+          this.hasWasm = !!state.has_wasm;
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -104,7 +108,8 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
     this.defaultTabs[this.active].types.push(customArg);
   }
 
-  trackByFn = (index: number, item: NamedCLTypeArg): string => item['name'].toString();
+  trackByFn = (index: number, item: NamedCLTypeArg): string =>
+    item['name'].toString();
 
   build() {
     this.argument = '[';
@@ -117,9 +122,19 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
         return;
       }
       const entry: ArgumentEntry = {
-        name: this.parseName(children[2] as HTMLInputElement, (children[1] as HTMLInputElement).value, (children[0] as HTMLInputElement).value),
-        type: this.parseType(children[2] as HTMLInputElement, (children[1] as HTMLInputElement).value),
-        value: this.parseValue(children[2] as HTMLInputElement, (children[1] as HTMLInputElement).value),
+        name: this.parseName(
+          children[2] as HTMLInputElement,
+          (children[1] as HTMLInputElement).value,
+          (children[0] as HTMLInputElement).value,
+        ),
+        type: this.parseType(
+          children[2] as HTMLInputElement,
+          (children[1] as HTMLInputElement).value,
+        ),
+        value: this.parseValue(
+          children[2] as HTMLInputElement,
+          (children[1] as HTMLInputElement).value,
+        ),
       };
 
       this.argument += JSON.stringify(entry) + ',';
@@ -131,7 +146,11 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
     this.argument && this.argumentChanged.emit(this.argument);
   }
 
-  private parseName(input: HTMLInputElement, type: string, name: string): string {
+  private parseName(
+    input: HTMLInputElement,
+    type: string,
+    name: string,
+  ): string {
     const inputValue = input.value.trim();
     switch (type) {
       case CLType.Option(CLType.Any()).toString():
@@ -141,11 +160,10 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
       case CLType.Map(CLType.Any(), CLType.Any()).toString():
       case CLType.Tuple1(CLType.Any()).toString():
       case CLType.Tuple2(CLType.Any(), CLType.Any()).toString():
-      case CLType.Tuple3(CLType.Any(), CLType.Any(), CLType.Any()).toString():
-        {
-          const parsedInput = JSON.parse(inputValue);
-          return parsedInput.name || name;
-        }
+      case CLType.Tuple3(CLType.Any(), CLType.Any(), CLType.Any()).toString(): {
+        const parsedInput = JSON.parse(inputValue);
+        return parsedInput.name || name;
+      }
       default:
         return name;
     }
@@ -215,19 +233,19 @@ export class ArgBuilderComponent implements AfterViewInit, OnDestroy {
       case CLType.PublicKey().toString():
       case CLType.Any().toString():
         return inputValue as unknown as T;
-      default:
-        {
-          const test = JSON.parse(inputValue);
-          return test.value as unknown as T;
-        }
+      default: {
+        const test = JSON.parse(inputValue);
+        return test.value as unknown as T;
+      }
     }
   }
 
   private addArgs() {
     const args: [] = this.storageService.get('args');
     this.defaultTabs[0].types = [];
-    args && args.forEach((arg) => {
-      this.defaultTabs[0].types.push(arg);
-    });
+    args &&
+      args.forEach((arg) => {
+        this.defaultTabs[0].types.push(arg);
+      });
   }
 }

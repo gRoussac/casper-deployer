@@ -1,6 +1,22 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, OnDestroy, Output, ViewChild } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { DeployReturn, NamedCLTypeArg, State } from '@casper-api/api-interfaces';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Inject,
+  Input,
+  OnDestroy,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  DeployReturn,
+  NamedCLTypeArg,
+  State,
+} from '@casper-api/api-interfaces';
 import { ResultService } from '../result/result.service';
 import { Subscription } from 'rxjs';
 import { DeployerService } from '@casper-data/data-access-deployer';
@@ -9,24 +25,10 @@ import { Toaster, TOASTER_TOKEN } from '@casper-util/toaster';
 import { WatcherService } from '@casper-util/watcher';
 import { StorageService } from '@casper-util/storage';
 import { DeployService } from '@casper-util/deploy';
-import { Deploy, PublicKey, motesToCSPR } from 'casper-sdk';
-import { JsonTypes } from 'typedjson';
+import { Deploy, PublicKey, motesToCSPR } from 'casper-rust-wasm-sdk';
+import { WalletService } from '@casper-util/wallet';
 
-type EntrypointsType = { [key: string]: string; };
-
-type CasperlabsHelperDeploy = { deploy: JsonTypes; };
-
-interface WindowWithCasperlabsHelper {
-  casperlabsHelper?: {
-    sign: (
-      deploy: CasperlabsHelperDeploy,
-      publicKey: string
-    ) => Promise<CasperlabsHelperDeploy>;
-  };
-  document?: {
-    defaultView?: (Window & typeof globalThis) | null;
-  };
-}
+type EntrypointsType = { [key: string]: string };
 
 @Component({
   selector: 'casper-deployer-put-deploy',
@@ -67,7 +69,6 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
     return this._argument;
   }
 
-  window!: WindowWithCasperlabsHelper;
   readonly quoteRegex = new RegExp(['^', "'", '+|', "'", '+$'].join(''), 'g');
   activePublicKey?: string;
   publicKey?: string;
@@ -94,7 +95,6 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   private _argument!: string;
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
     @Inject(ENV_CONFIG) public readonly config: EnvironmentConfig,
     @Inject(TOASTER_TOKEN) private readonly toastr: Toaster,
     private readonly deployerService: DeployerService,
@@ -103,48 +103,52 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly storageService: StorageService,
     private readonly deployService: DeployService,
+    private readonly walletService: WalletService,
   ) {
-    this.window = this.document.defaultView as unknown as WindowWithCasperlabsHelper;
     this.gasFee = this.config['gasFee'];
     this.TTL = this.config['TTL'];
   }
 
   ngAfterViewInit(): void {
-    this.getStateSubscription = this.deployerService.getState().subscribe((state: State) => {
-      if (state.user?.activePublicKey) {
-        this.activePublicKey = state.user.activePublicKey;
-        this.publicKey = this.activePublicKey;
-        this.publicKeyElt.nativeElement.value = this.publicKey;
-      }
-      if (state.apiUrl && this.apiUrl !== state.apiUrl) {
-        this.apiUrl = state.apiUrl;
-        let chainName: string = this.storageService.get('chain_name') || this.config['chain_name_localhost'];
+    this.getStateSubscription = this.deployerService
+      .getState()
+      .subscribe((state: State) => {
+        if (state.user?.activePublicKey) {
+          this.activePublicKey = state.user.activePublicKey;
+          this.publicKey = this.activePublicKey;
+          this.publicKeyElt.nativeElement.value = this.publicKey;
+        }
+        if (state.apiUrl && this.apiUrl !== state.apiUrl) {
+          this.apiUrl = state.apiUrl;
+          let chainName: string =
+            this.storageService.get('chain_name') ||
+            this.config['chain_name_localhost'];
 
-        if (this.apiUrl.includes(this.config['localhost'])) {
-          chainName = this.config['chain_name_localhost'];
-        } else if (this.apiUrl.includes(this.config['default_node_testnet'])) {
-          chainName = this.config['chain_name_testnet'];
-        }
-        else if (this.apiUrl.includes(this.config['default_node_integration'])) {
-          chainName = this.config['chain_name_integration'];
-        }
-        else if (this.apiUrl.includes(this.config['default_node_mainnet'])) {
-          chainName = this.config['chain_name_mainnet'];
-        }
+          if (this.apiUrl.includes(this.config['localhost'])) {
+            chainName = this.config['chain_name_localhost'];
+          } else if (
+            this.apiUrl.includes(this.config['default_node_testnet'])
+          ) {
+            chainName = this.config['chain_name_testnet'];
+          } else if (
+            this.apiUrl.includes(this.config['default_node_mainnet'])
+          ) {
+            chainName = this.config['chain_name_mainnet'];
+          }
 
-        if (chainName) {
-          this.selectChainNameOption(chainName);
-          this.chain_name = chainName;
+          if (chainName) {
+            this.selectChainNameOption(chainName);
+            this.chain_name = chainName;
+          }
         }
-      }
-      if (state.stateRootHash) {
-        this.stateRootHash = state.stateRootHash;
-      }
-      if (state.stateRootHash || state.user?.activePublicKey) {
-        this.checkEntryPoints();
-      }
-      this.changeDetectorRef.markForCheck();
-    });
+        if (state.stateRootHash) {
+          this.stateRootHash = state.stateRootHash;
+        }
+        if (state.stateRootHash || state.user?.activePublicKey) {
+          this.checkEntryPoints();
+        }
+        this.changeDetectorRef.markForCheck();
+      });
     const deploy_args = this.storageService.get('deploy_args');
     deploy_args && (this.argsElt.nativeElement.value = deploy_args);
     const fee = this.storageService.get('fee');
@@ -161,7 +165,8 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.getStateSubscription && this.getStateSubscription.unsubscribe();
-    this.getBlockStateSubscription && this.getBlockStateSubscription.unsubscribe();
+    this.getBlockStateSubscription &&
+      this.getBlockStateSubscription.unsubscribe();
   }
 
   selectChainName($event: Event) {
@@ -179,25 +184,33 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
       this.connect.emit();
       return;
     }
-    const
-      chain_name: string = this.chainNameElt?.nativeElement.value?.trim() || '',
+    const chain_name: string =
+        this.chainNameElt?.nativeElement.value?.trim() || '',
       session_account: string = publicKeyAsString,
-      session_path: string = this.sessionPathElt?.nativeElement.value?.trim() || '',
-      session_name: string = this.sessionNameElt?.nativeElement.value?.trim() || '',
-      session_hash: string = this.sessionHashElt?.nativeElement.value?.trim() || '',
-      session_entry_point: string = (this.entryPointElt?.nativeElement.value || this.selectEntryPointElt?.nativeElement.value)?.toString().trim() || '',
-      session_version: string = (+(this.versionElt?.nativeElement.value?.trim())).toString() || '',
-      session_args_json: string = this.argsElt?.nativeElement.value?.trim() || '',
-      payment_amount: string = this.gasFeeElt?.nativeElement.value?.trim() || '',
+      session_path: string =
+        this.sessionPathElt?.nativeElement.value?.trim() || '',
+      session_name: string =
+        this.sessionNameElt?.nativeElement.value?.trim() || '',
+      session_hash: string =
+        this.sessionHashElt?.nativeElement.value?.trim() || '',
+      session_entry_point: string =
+        (
+          this.entryPointElt?.nativeElement.value ||
+          this.selectEntryPointElt?.nativeElement.value
+        )
+          ?.toString()
+          .trim() || '',
+      session_version: string =
+        (+this.versionElt?.nativeElement.value?.trim()).toString() || '',
+      session_args_json: string =
+        this.argsElt?.nativeElement.value?.trim() || '',
+      payment_amount: string =
+        this.gasFeeElt?.nativeElement.value?.trim() || '',
       ttl: string = this.TTLElt?.nativeElement.value?.trim() || '',
       session_call_package = !!this.isPackageElt?.nativeElement.checked;
 
     this.deploy = this.deployService.makeDeploy(
-      {
-        session_account,
-        chain_name,
-        ttl
-      },
+      { session_account, chain_name, ttl },
       {
         session_path,
         session_name,
@@ -205,10 +218,10 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
         session_entry_point,
         session_version,
         session_args_json,
-        session_call_package
+        session_call_package,
       },
       payment_amount,
-      this.wasm
+      this.wasm,
     );
     this.deploy && this.resultService.setResult<Deploy>('Deploy', this.deploy);
   }
@@ -221,16 +234,12 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
     }
     try {
       this.makeDeploy();
-      const casperlabsHelperDeploy: CasperlabsHelperDeploy = { deploy: this.deploy };
-      const signedDeployToJson = (casperlabsHelperDeploy && await this.window?.casperlabsHelper?.sign(
-        casperlabsHelperDeploy,
-        publicKey
-      ))?.deploy;
+      const signedDeployToJson =
+        this.deploy &&
+        (await this.walletService.signDeploy(this.deploy, publicKey));
 
-      // TODO Bug is signer
       if (!signedDeployToJson) {
-        console.error(this.window?.casperlabsHelper?.sign, publicKey);
-        this.toastr.error(publicKey, 'Error with signer deploy');
+        this.toastr.error(publicKey, 'Error with signed deploy');
         this.connect.emit();
         return;
       }
@@ -247,25 +256,40 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
       if (!sendDeploy) {
         return deploy;
       }
-      this.deployerService.putDeploy(JSON.stringify(deploy), this.apiUrl).subscribe((deploy: string | DeployReturn) => {
-        const deploy_hash = (deploy as DeployReturn).deploy_hash;
-        deploy_hash && this.resultService.setResult<Deploy>('Deploy Hash', deploy_hash || deploy);
-        deploy_hash && this.deployerService.setState({ deploy_hash });
-        deploy_hash && this.watcherService.watchDeploy(deploy_hash, this.apiUrl);
-        deploy_hash && this.storageService.setState({ deploy_hash });
-      });
+      this.deployerService
+        .putDeploy(JSON.stringify(deploy), this.apiUrl)
+        .subscribe((deploy: string | DeployReturn) => {
+          const deploy_hash = (deploy as DeployReturn).deploy_hash;
+          deploy_hash &&
+            this.resultService.setResult<Deploy>(
+              'Deploy Hash',
+              deploy_hash || deploy,
+            );
+          deploy_hash && this.deployerService.setState({ deploy_hash });
+          deploy_hash &&
+            this.watcherService.watchDeploy(deploy_hash, this.apiUrl);
+          deploy_hash && this.storageService.setState({ deploy_hash });
+        });
     } catch (err) {
       console.error(err);
     }
   }
 
   async speculativeDeploy() {
-    const speculative = true, sendDeploy = false;
+    const speculative = true,
+      sendDeploy = false;
     this.makeDeploy();
     const signedDeploy = await this.signDeploy(sendDeploy);
-    signedDeploy && (this.deployerService.putDeploy(signedDeploy, this.apiUrl, speculative).subscribe((deploy: string | DeployReturn) => {
-      deploy && this.resultService.setResult<Deploy>('Speculative Deploy Hash', (deploy as DeployReturn).deploy_hash);
-    }));
+    signedDeploy &&
+      this.deployerService
+        .putDeploy(signedDeploy, this.apiUrl, speculative)
+        .subscribe((deploy: string | DeployReturn) => {
+          deploy &&
+            this.resultService.setResult<Deploy>(
+              'Speculative Deploy Hash',
+              (deploy as DeployReturn).deploy_hash,
+            );
+        });
   }
 
   resetFirstForm($event: Event) {
@@ -281,7 +305,11 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
     this.sessionHashElt.nativeElement.value = '';
     this.entryPoint = '';
     this.resetOptions();
-    this.storageService.setState({ sessionName: '', sessionHash: '', entry_point: '' });
+    this.storageService.setState({
+      sessionName: '',
+      sessionHash: '',
+      entry_point: '',
+    });
     this.updateArgs();
   }
 
@@ -302,11 +330,17 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   }
 
   get isSessionNameDisabled(): boolean {
-    return this.sessionPathElt?.nativeElement.value || this.sessionHashElt?.nativeElement.value;
+    return (
+      this.sessionPathElt?.nativeElement.value ||
+      this.sessionHashElt?.nativeElement.value
+    );
   }
 
   get isSessionHashDisabled(): boolean {
-    return this.sessionPathElt?.nativeElement.value || this.sessionNameElt?.nativeElement.value;
+    return (
+      this.sessionPathElt?.nativeElement.value ||
+      this.sessionNameElt?.nativeElement.value
+    );
   }
 
   get isEntryPointDisabled(): boolean {
@@ -324,7 +358,8 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   async onFileSelected(event: Event) {
     this.animate = true;
     this.file_name = this.sessionPathElt?.nativeElement.value.split('\\').pop();
-    const file = (event.target as HTMLInputElement).files?.item(0), buffer = await file?.arrayBuffer();
+    const file = (event.target as HTMLInputElement).files?.item(0),
+      buffer = await file?.arrayBuffer();
     this.wasm = buffer && new Uint8Array(buffer);
     this.animate = false;
     this.resetSecondForm();
@@ -385,27 +420,33 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
     if (sessionName && !publicKey && !this.key) {
       return;
     }
-    const key = hash || (publicKey && new PublicKey(publicKey).toAccountHash().toFormattedString()) || this.key;
-    key && this.stateRootHash && (this.getBlockStateSubscription = this.deployerService.getBlockState(
-      this.stateRootHash,
-      key,
-      sessionName,
-      this.apiUrl
-    ).subscribe(async (storedValue: object | string): Promise<void> => {
-      const isString = typeof storedValue === 'string';
-      if (!isString) {
-        const contract_entrypoints = (storedValue as { Contract: { entry_points?: EntrypointsType[]; }; }).Contract?.entry_points;
-        contract_entrypoints && (this.contract_entrypoints = contract_entrypoints);
-        this.resetOptions();
-        if (contract_entrypoints) {
-          contract_entrypoints.forEach(key => {
-            key && this.options.push(key['name']);
-          });
-        }
-        this.entryPoint && this.updateArgs(this.entryPoint);
-        this.changeDetectorRef.markForCheck();
-      }
-    }));
+    const key =
+      hash ||
+      (publicKey &&
+        new PublicKey(publicKey).toAccountHash().toFormattedString()) ||
+      this.key;
+    key &&
+      this.stateRootHash &&
+      (this.getBlockStateSubscription = this.deployerService
+        .getBlockState(this.stateRootHash, key, sessionName, this.apiUrl)
+        .subscribe(async (storedValue: object | string): Promise<void> => {
+          const isString = typeof storedValue === 'string';
+          if (!isString) {
+            const contract_entrypoints = (
+              storedValue as { Contract: { entry_points?: EntrypointsType[] } }
+            ).Contract?.entry_points;
+            contract_entrypoints &&
+              (this.contract_entrypoints = contract_entrypoints);
+            this.resetOptions();
+            if (contract_entrypoints) {
+              contract_entrypoints.forEach((key) => {
+                key && this.options.push(key['name']);
+              });
+            }
+            this.entryPoint && this.updateArgs(this.entryPoint);
+            this.changeDetectorRef.markForCheck();
+          }
+        }));
   }
 
   private resetOptions() {
@@ -414,31 +455,27 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
 
   private updateArgs(entry_point_value?: string) {
     if (entry_point_value && this.contract_entrypoints) {
-      const entry_point = this.contract_entrypoints.find((entry_point: EntrypointsType) => entry_point['name'] === entry_point_value);
+      const entry_point = this.contract_entrypoints.find(
+        (entry_point: EntrypointsType) =>
+          entry_point['name'] === entry_point_value,
+      );
       const args = entry_point?.['args'];
-      args && this.storageService.setState({
-        args: args as unknown as NamedCLTypeArg[],
-        entry_point: entry_point_value
-      });
+      args &&
+        this.storageService.setState({
+          args: args as unknown as NamedCLTypeArg[],
+          entry_point: entry_point_value,
+        });
     } else {
-      this.storageService.setState({
-        args: [],
-        entry_point: ''
-      });
+      this.storageService.setState({ args: [], entry_point: '' });
     }
   }
 
   inputEntryPointChange($event: Event) {
     const entry_point_value = ($event.target as HTMLSelectElement).value;
     if (!entry_point_value) {
-      this.storageService.setState({
-        args: [],
-        entry_point: ''
-      });
+      this.storageService.setState({ args: [], entry_point: '' });
     } else {
-      this.storageService.setState({
-        entry_point: entry_point_value
-      });
+      this.storageService.setState({ entry_point: entry_point_value });
     }
     this.entryPoint = entry_point_value;
   }
@@ -446,12 +483,8 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   selectEntryPointChange($event: Event) {
     const entry_point_value = ($event.target as HTMLSelectElement).value;
     if (!entry_point_value) {
-      this.storageService.setState({
-        args: [],
-        entry_point: ''
-      });
-    }
-    else {
+      this.storageService.setState({ args: [], entry_point: '' });
+    } else {
       this.updateArgs(entry_point_value);
     }
     this.entryPoint = entry_point_value;
@@ -474,11 +507,13 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   }
 
   private isFormValid() {
-    const firstCondition = this.publicKeyElt?.nativeElement.value &&
-      this.chainNameElt?.nativeElement.value &&
-      this.gasFeeElt?.nativeElement.value &&
-      this.TTLElt?.nativeElement.value,
-      secondCondition = this.sessionPathElt?.nativeElement.value ||
+    const firstCondition =
+        this.publicKeyElt?.nativeElement.value &&
+        this.chainNameElt?.nativeElement.value &&
+        this.gasFeeElt?.nativeElement.value &&
+        this.TTLElt?.nativeElement.value,
+      secondCondition =
+        this.sessionPathElt?.nativeElement.value ||
         this.sessionNameElt?.nativeElement.value ||
         this.sessionHashElt?.nativeElement.value;
     return firstCondition && secondCondition;
@@ -491,14 +526,15 @@ export class PutDeployComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectChainNameOption(chainName: string) {
-    const select = (this.chainNameSelectElt.nativeElement as HTMLSelectElement);
-    chainName && Array.prototype.slice.call(select.options).find((option, index) => {
-      const match = chainName == option.value;
-      if (match) {
-        select.selectedIndex = index;
-        this.setChainName(chainName);
-      }
-      return match;
-    });
+    const select = this.chainNameSelectElt.nativeElement as HTMLSelectElement;
+    chainName &&
+      Array.prototype.slice.call(select.options).find((option, index) => {
+        const match = chainName == option.value;
+        if (match) {
+          select.selectedIndex = index;
+          this.setChainName(chainName);
+        }
+        return match;
+      });
   }
 }

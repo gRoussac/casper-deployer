@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CLType, CLTypeEnum } from 'casper-sdk';
+import { CLType, CLTypeEnum } from 'casper-rust-wasm-sdk';
 import { NamedCLTypeArg } from '@casper-api/api-interfaces';
 
 @Component({
@@ -12,10 +12,9 @@ import { NamedCLTypeArg } from '@casper-api/api-interfaces';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArgumentComponent {
-  @Input() defaultType: NamedCLTypeArg = {
-    name: '',
-    cl_type: CLType?.U8(),
-  };
+  @Input() defaultType: NamedCLTypeArg = { name: '', cl_type: CLType.U8() };
   CLTypeEnum = CLTypeEnum;
-  types = Object.keys(this.CLTypeEnum || {}).filter(key => isNaN(Number(key)));
+  types = Object.keys(this.CLTypeEnum || {}).filter((key) =>
+    isNaN(Number(key)),
+  );
 }

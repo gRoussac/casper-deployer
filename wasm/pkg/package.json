@@ -1,12 +1,13 @@
 {
   "name": "deployer",
+  "type": "module",
   "version": "0.1.0",
   "files": [
     "deployer_bg.wasm",
     "deployer.js",
     "deployer.d.ts"
   ],
-  "module": "deployer.js",
+  "main": "deployer.js",
   "types": "deployer.d.ts",
   "sideEffects": [
     "./snippets/*"

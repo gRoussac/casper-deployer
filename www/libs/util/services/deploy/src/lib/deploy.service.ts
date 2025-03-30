@@ -2,27 +2,45 @@ import { Inject, Injectable } from '@angular/core';
 import { ENV_CONFIG, EnvironmentConfig } from '@casper-util/config';
 import { TOASTER_TOKEN, Toaster } from '@casper-util/toaster';
 import { SDK_TOKEN } from '@casper-util/wasm';
-import { Bytes, Deploy, DeployStrParams, PaymentStrParams, SDK, SessionStrParams } from 'casper-sdk';
+import {
+  Bytes,
+  Deploy,
+  DeployStrParams,
+  PaymentStrParams,
+  SDK,
+  SessionStrParams,
+} from 'casper-rust-wasm-sdk';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class DeployService {
-
   constructor(
     @Inject(ENV_CONFIG) public readonly config: EnvironmentConfig,
     @Inject(TOASTER_TOKEN) private readonly toastr: Toaster,
     @Inject(SDK_TOKEN) private readonly sdk: SDK,
-  ) { }
+  ) {}
 
-  makeDeploy(deployStrParams: { chain_name: string, session_account: string, private_key?: string, timestamp?: string, ttl?: string; }, sessionStrParams: { session_path?: string, session_name?: string, session_hash?: string, session_entry_point?: string; session_version?: string; session_args_json?: string; session_call_package?: boolean; }, payment_amount: string, wasm?: Uint8Array): Deploy | undefined {
-    const {
-      chain_name,
-      session_account,
-      private_key,
-      timestamp,
-      ttl,
-    } = deployStrParams;
+  makeDeploy(
+    deployStrParams: {
+      chain_name: string;
+      session_account: string;
+      private_key?: string;
+      timestamp?: string;
+      ttl?: string;
+    },
+    sessionStrParams: {
+      session_path?: string;
+      session_name?: string;
+      session_hash?: string;
+      session_entry_point?: string;
+      session_version?: string;
+      session_args_json?: string;
+      session_call_package?: boolean;
+    },
+    payment_amount: string,
+    wasm?: Uint8Array,
+  ): Deploy | undefined {
+    const { chain_name, session_account, private_key, timestamp, ttl } =
+      deployStrParams;
 
     const {
       session_path,
@@ -31,7 +49,7 @@ export class DeployService {
       session_entry_point,
       session_version,
       session_args_json,
-      session_call_package
+      session_call_package,
     } = sessionStrParams;
 
     const payment_params = new PaymentStrParams();
@@ -60,10 +78,13 @@ export class DeployService {
           session_params.session_package_name = session_name;
         }
       }
-      session_entry_point && (session_params.session_entry_point = session_entry_point);
+      session_entry_point &&
+        (session_params.session_entry_point = session_entry_point);
       session_version && (session_params.session_version = session_version);
     } else {
-      session_path && wasm && (session_params.session_bytes = Bytes.fromUint8Array(wasm));
+      session_path &&
+        wasm &&
+        (session_params.session_bytes = Bytes.fromUint8Array(wasm));
     }
     session_args_json && (session_params.session_args_json = session_args_json);
 
@@ -85,21 +106,26 @@ export class DeployService {
     return;
   }
 
-  makeTransfer(deployStrParams: { chain_name: string, session_account: string, private_key?: string, timestamp?: string, ttl?: string; }, target_account: string, amount: string) {
-    const {
-      chain_name,
-      session_account,
-      private_key,
-      timestamp,
-      ttl,
-    } = deployStrParams;
+  makeTransfer(
+    deployStrParams: {
+      chain_name: string;
+      session_account: string;
+      private_key?: string;
+      timestamp?: string;
+      ttl?: string;
+    },
+    target_account: string,
+    amount: string,
+  ) {
+    const { chain_name, session_account, private_key, timestamp, ttl } =
+      deployStrParams;
 
     const deploy_params = new DeployStrParams(
       chain_name,
       session_account,
       private_key,
       timestamp,
-      ttl
+      ttl,
     );
 
     const payment_params = new PaymentStrParams();

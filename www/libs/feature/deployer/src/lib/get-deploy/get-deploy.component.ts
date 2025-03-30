@@ -1,11 +1,21 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { DeployerService } from '@casper-data/data-access-deployer';
 import { State } from '@casper-api/api-interfaces';
 import { ResultService } from '../result/result.service';
 import { StorageService } from '@casper-util/storage';
-import { GetDeployResult } from 'casper-sdk';
+import { GetDeployResult } from 'casper-rust-wasm-sdk';
 
 @Component({
   selector: 'casper-deployer-get-deploy',
@@ -13,7 +23,7 @@ import { GetDeployResult } from 'casper-sdk';
   imports: [CommonModule],
   templateUrl: './get-deploy.component.html',
   styleUrls: ['./get-deploy.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GetDeployComponent implements OnDestroy, AfterViewInit {
   @Output() refreshPurse: EventEmitter<void> = new EventEmitter<void>();
@@ -28,8 +38,8 @@ export class GetDeployComponent implements OnDestroy, AfterViewInit {
     private readonly deployerService: DeployerService,
     private readonly resultService: ResultService,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly storageService: StorageService
-  ) { }
+    private readonly storageService: StorageService,
+  ) {}
 
   ngOnDestroy() {
     this.getStateSubscription && this.getStateSubscription.unsubscribe();
@@ -37,26 +47,38 @@ export class GetDeployComponent implements OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.getStateSubscription = this.deployerService.getState().subscribe((state: State) => {
-      if (state.apiUrl) {
-        this.apiUrl = state.apiUrl;
-      }
-      if (state.deploy_hash) {
-        this.deploy_hash = state.deploy_hash;
-        this.getDeployElt.nativeElement.value = this.deploy_hash;
-      }
-      this.changeDetectorRef.markForCheck();
-    });
+    this.getStateSubscription = this.deployerService
+      .getState()
+      .subscribe((state: State) => {
+        if (state.apiUrl) {
+          this.apiUrl = state.apiUrl;
+        }
+        if (state.deploy_hash) {
+          this.deploy_hash = state.deploy_hash;
+          this.getDeployElt.nativeElement.value = this.deploy_hash;
+        }
+        this.changeDetectorRef.markForCheck();
+      });
     this.deploy_hash = this.storageService.get('deploy_hash');
   }
 
   getDeploy() {
-    const deploy_hash = this.getDeployElt.nativeElement.value.replace('deploy-', '');
-    deploy_hash && (this.getDeploySubscription = this.deployerService.getDeploy(deploy_hash, this.apiUrl).subscribe(deployResult => {
-      deployResult && this.resultService.setResult<GetDeployResult>('Deploy info', deployResult);
-      this.refreshPurse.emit();
-      this.getDeploySubscription.unsubscribe();
-    }));
+    const deploy_hash = this.getDeployElt.nativeElement.value.replace(
+      'deploy-',
+      '',
+    );
+    deploy_hash &&
+      (this.getDeploySubscription = this.deployerService
+        .getDeploy(deploy_hash, this.apiUrl)
+        .subscribe((deployResult) => {
+          deployResult &&
+            this.resultService.setResult<GetDeployResult>(
+              'Deploy info',
+              deployResult,
+            );
+          this.refreshPurse.emit();
+          this.getDeploySubscription.unsubscribe();
+        }));
   }
 
   copy(value: string): void {

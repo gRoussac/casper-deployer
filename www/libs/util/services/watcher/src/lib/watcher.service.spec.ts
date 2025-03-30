@@ -12,16 +12,10 @@ describe('WatcherService', () => {
     TestBed.configureTestingModule({
       providers: [
         WatcherService,
-        {
-          provide: TOASTER_TOKEN, useValue: {},
-        },
-        {
-          provide: ENV_CONFIG, useValue: config
-        },
-        {
-          provide: SDK_TOKEN, useValue: {},
-        },
-      ]
+        { provide: TOASTER_TOKEN, useValue: {} },
+        { provide: ENV_CONFIG, useValue: config },
+        { provide: SDK_TOKEN, useValue: {} },
+      ],
     });
     service = TestBed.inject(WatcherService);
   });

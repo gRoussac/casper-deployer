@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StateRootHashComponent } from '../state-root-hash/state-root-hash.component';
 import { QueryGlobalStateComponent } from '../query-global-state/query-global-state.component';
@@ -9,13 +14,14 @@ import { BalanceComponent } from '../balance/balance.component';
 import { ResultComponent } from '../result/result.component';
 import { ResultService } from '../result/result.service';
 import { UtilHihlightWebworkerModule } from '@casper-util/hightlight-webworker';
-import { DeployerService } from '@casper-data/data-access-deployer';
 import { TransferComponent } from '../transfer/transfer.component';
 import { DictionaryComponent } from '../dictionary/dictionary.component';
 import { RouteurHubService } from '@casper-util/routeur-hub';
 import { State } from '@casper-api/api-interfaces';
 import { Subscription } from 'rxjs';
 import { ArgBuilderComponent } from '../arg-builder/arg-builder.component';
+import { DeployerService } from '@casper-data/data-access-deployer';
+import { DeployService } from '@casper-util/deploy';
 
 @Component({
   selector: 'casper-deployer',
@@ -32,9 +38,9 @@ import { ArgBuilderComponent } from '../arg-builder/arg-builder.component';
     PutDeployComponent,
     ResultComponent,
     DictionaryComponent,
-    ArgBuilderComponent
+    ArgBuilderComponent,
   ],
-  providers: [DeployerService, ResultService],
+  providers: [ResultService, DeployerService, DeployService],
   templateUrl: './deployer.component.html',
   styleUrls: ['./deployer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,8 +53,8 @@ export class DeployerComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly deployerService: DeployerService,
-    private readonly routeurHubService: RouteurHubService
-  ) { }
+    private readonly routeurHubService: RouteurHubService,
+  ) {}
 
   ngOnInit(): void {
     this.setRouteurHubSubscription();
@@ -59,13 +65,13 @@ export class DeployerComponent implements OnInit, OnDestroy {
   }
 
   private setRouteurHubSubscription() {
-    this.routeurHubSubscription = this.routeurHubService.getHubState().subscribe((state: State) => {
-      if (state.user) {
-        this.deployerService.setState({
-          user: state.user
-        });
-      }
-    });
+    this.routeurHubSubscription = this.routeurHubService
+      .getHubState()
+      .subscribe((state: State) => {
+        if (state.user) {
+          this.deployerService.setState({ user: state.user });
+        }
+      });
   }
 
   connect() {

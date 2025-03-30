@@ -1,31 +1,30 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  Renderer2,
+  Provider,
+  ImportProvidersSource,
+} from '@angular/core';
 
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Subscription } from 'rxjs';
-
 import { HeaderComponent } from '@casper-ui/header';
 import { UsersService } from '@casper-data/data-access-users';
 import { Users, User, Roles } from '@casper-api/api-interfaces';
 import { DEPLOYER_TOKEN } from '@casper-util/wasm';
-import { Deployer } from "deployer";
-import { CasperLabsHelper } from 'casper-js-sdk/dist/@types/casperlabsSigner';
+import { Deployer } from 'deployer';
 import { RouterModule } from '@angular/router';
 import { RouteurHubService } from '@casper-util/routeur-hub';
 import { StorageService } from '@casper-util/storage';
 import { DeployerService } from '@casper-data/data-access-deployer';
-import { motesToCSPR } from 'casper-sdk';
-
-declare global {
-  interface Window {
-    casperlabsHelper: CasperLabsHelper;
-  }
-}
-
-const imports = [
-  CommonModule,
-  RouterModule,
-  HeaderComponent
-];
+import { motesToCSPR } from 'casper-rust-wasm-sdk';
+import { WalletService } from '@casper-util/wallet';
+const imports = [CommonModule, RouterModule, HeaderComponent];
 
 @Component({
   selector: 'casper-root',
@@ -38,7 +37,8 @@ const imports = [
     UsersService,
     RouteurHubService,
     StorageService,
-    DeployerService
+    DeployerService,
+    WalletService,
   ],
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -49,14 +49,20 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   user?: User;
   balance!: string;
   apiUrl!: string;
+  walletVersion!: string;
 
   readonly Roles = Roles;
 
   private usersSubscription!: Subscription;
   private accountInformationSubscription!: Subscription;
-  subscriptions: Subscription[] = [];
-
+  private subscriptions: Subscription[] = [];
   private _activePublicKey!: string; // memoize activePublicKey
+  private handler: EventListener = async () => {
+    await this.getActivePublicKey();
+    await this.refreshData();
+  };
+  private eventTypes: any;
+  private eventListeners: (() => void)[] = [];
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -64,62 +70,117 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly usersService: UsersService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly routeurHubService: RouteurHubService,
-    private readonly storageService: StorageService
-  ) {
-  }
+    private readonly storageService: StorageService,
+    private readonly walletService: WalletService,
+    private readonly renderer: Renderer2,
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.setRouteurHubSubscriptions();
     this.setUsersSubscription();
     this.window = this.document.defaultView;
-    this.window?.addEventListener('signer:unlocked', async () => await this.refreshData());
-    this.window?.addEventListener('signer:activeKeyChanged', async () => await this.refreshData());
+    this.eventTypes = (this.window as any)?.CasperWalletEventTypes;
     this.deployer.hello();
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     this.apiUrl = this.storageService.get('apiUrl');
-    // Bug on the Signer, activePublicKey rejected on first quick load
-    setTimeout(async () => {
-      await this.refreshData();
-    }, 150);
+    this.walletVersion = await this.walletService.getVersion();
+    if (this.walletVersion) {
+      this.listenCasperWalletEvents();
+    }
+    try {
+      this.isConnected = await this.walletService.isConnected();
+    } catch (err) {
+      console.warn(err);
+    }
+    if (this.isConnected) {
+      await this.getActivePublicKey();
+      this.isConnected = await this.walletService.isConnected();
+      setTimeout(async () => {
+        await this.refreshData();
+      });
+    }
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(subscription => {
+    this.subscriptions.forEach((subscription) => {
       subscription && subscription.unsubscribe();
     });
+    this.removeCasperWalletEvents();
   }
 
   async connect() {
     try {
-      this.window?.casperlabsHelper?.requestConnection();
-      await this.refreshData();
-    } catch (error) { console.error(error); }
+      if (!this.isConnected) {
+        await this.getActivePublicKey();
+        this.isConnected = await this.walletService.isConnected();
+        this.isConnected && (await this.refreshData());
+      } else {
+        await this.walletService.switchAccount();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
+
+  private listenCasperWalletEvents = () => {
+    if (!this.eventTypes || !this.eventTypes.ActiveKeyChanged) {
+      console.warn(
+        'CasperWalletEventTypes or ActiveKeyChanged is not defined.',
+      );
+      return;
+    }
+
+    this.eventListeners.push(
+      this.renderer.listen(
+        this.window,
+        this.eventTypes.ActiveKeyChanged,
+        this.handler!,
+      ),
+    );
+    this.eventListeners.push(
+      this.renderer.listen(
+        this.window,
+        this.eventTypes.Unlocked,
+        this.handler!,
+      ),
+    );
+    // this.window!.addEventListener(eventTypes.Connected, this.handler!);
+  };
+
+  private removeCasperWalletEvents = () => {
+    this.eventListeners.forEach((unlisten) => unlisten());
+    this.eventListeners = [];
+  };
 
   private refreshPurse() {
     this.setAccountInformationSubscription();
   }
 
   private setRouteurHubSubscriptions() {
-    this.subscriptions.push(this.routeurHubService.connect$.subscribe(async () => {
-      this.connect();
-    }));
-    this.subscriptions.push(this.routeurHubService.refreshPurse$.subscribe(async () => {
-      this.refreshPurse();
-    }));
-    this.subscriptions.push(this.routeurHubService.getHubState().subscribe(async (state) => {
-      if (state.apiUrl) {
-        this.apiUrl = state.apiUrl;
-        this.storageService.setState(state);
-      }
-    }
-    ));
+    this.subscriptions.push(
+      this.routeurHubService.connect$.subscribe(async () => {
+        this.connect();
+      }),
+    );
+    this.subscriptions.push(
+      this.routeurHubService.refreshPurse$.subscribe(async () => {
+        this.refreshPurse();
+      }),
+    );
+    this.subscriptions.push(
+      this.routeurHubService.getHubState().subscribe(async (state) => {
+        if (state.apiUrl) {
+          this.apiUrl = state.apiUrl;
+          this.storageService.setState(state);
+        }
+      }),
+    );
   }
 
   private setUsersSubscription() {
-    this.usersSubscription = this.usersService.get().subscribe(users => {
+    this.usersSubscription = this.usersService.get().subscribe((users) => {
       this.users = users;
       this.changeDetectorRef.markForCheck();
       this.usersSubscription.unsubscribe();
@@ -127,29 +188,24 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async refreshData() {
-    await this.setActivePublicKey();
     this.setActiveUser();
     this.setPurse();
   }
 
-  private async setActivePublicKey() {
-    const isConnected$ = this.window?.casperlabsHelper?.isConnected(),
-      activePublicKey$ = this.window?.casperlabsHelper?.getActivePublicKey();
-    const promises = await Promise.allSettled([isConnected$, activePublicKey$])
-      .catch(error => console.error(error));
-    const results = promises?.filter(
-      ({ status }) => status === 'fulfilled'
-    ).map(result => (result as PromiseFulfilledResult<string | boolean>).value);
-    let isConnected, activePublicKey;
-    results && ([isConnected, activePublicKey] = results);
-    activePublicKey = activePublicKey as string;
-    this.activePublicKey = activePublicKey as string;
-    this.isConnected = (this.activePublicKey && isConnected) as boolean;
+  private async getActivePublicKey() {
+    const getActivePublicKey = await this.walletService.getActivePublicKey();
+    if (getActivePublicKey && this.activePublicKey != getActivePublicKey) {
+      this.activePublicKey = await this.walletService.getActivePublicKey();
+    }
   }
 
   private setActiveUser() {
-    this.user = this.users?.find((user: User) => user.activePublicKey == this.activePublicKey) as User;
-    !this.user && this.activePublicKey && (this.user = { activePublicKey: this.activePublicKey });
+    this.user = this.users?.find(
+      (user: User) => user.activePublicKey == this.activePublicKey,
+    ) as User;
+    !this.user &&
+      this.activePublicKey &&
+      (this.user = { activePublicKey: this.activePublicKey });
     this.routeurHubService.setHubState({ user: this.user });
   }
 
@@ -168,16 +224,16 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setAccountInformationSubscription() {
-    this.activePublicKey && (this.accountInformationSubscription = this.usersService.getBalanceOfByPublicKey(this.activePublicKey, this.apiUrl)
-      .subscribe(
-        (purse => {
+    this.activePublicKey &&
+      (this.accountInformationSubscription = this.usersService
+        .getBalanceOfByPublicKey(this.activePublicKey, this.apiUrl)
+        .subscribe((purse) => {
           if (JSON.parse(purse)?.name) {
             return;
           }
           this.balance = motesToCSPR(purse);
           this.changeDetectorRef.markForCheck();
           this.accountInformationSubscription.unsubscribe();
-        })
-      ));
+        }));
   }
 }

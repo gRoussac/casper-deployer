@@ -1,4 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Inject,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { DeployerService } from '@casper-data/data-access-deployer';
@@ -6,7 +15,7 @@ import { ResultService } from '../result/result.service';
 import { State } from '@casper-api/api-interfaces';
 import { Deployer } from 'deployer';
 import { DEPLOYER_TOKEN } from '@casper-util/wasm';
-import { PublicKey } from 'casper-sdk';
+import { PublicKey } from 'casper-rust-wasm-sdk';
 
 @Component({
   selector: 'casper-deployer-state-dictionary',
@@ -33,30 +42,43 @@ export class DictionaryComponent implements AfterViewInit, OnDestroy {
     private readonly deployerService: DeployerService,
     private readonly resultService: ResultService,
     @Inject(DEPLOYER_TOKEN) private readonly deployer: Deployer,
-    private readonly changeDetectorRef: ChangeDetectorRef
-  ) { }
+    private readonly changeDetectorRef: ChangeDetectorRef,
+  ) {}
 
   ngAfterViewInit(): void {
-    this.getStateSubscription = this.deployerService.getState().subscribe((state: State) => {
-      state.stateRootHash && (this.stateRootHash = state.stateRootHash);
-      state.apiUrl && (this.apiUrl = state.apiUrl);
-      if (state.user?.activePublicKey) {
-        this.activePublicKey = state.user.activePublicKey;
-      }
-      this.changeDetectorRef.markForCheck();
-    });
+    this.getStateSubscription = this.deployerService
+      .getState()
+      .subscribe((state: State) => {
+        state.stateRootHash && (this.stateRootHash = state.stateRootHash);
+        state.apiUrl && (this.apiUrl = state.apiUrl);
+        if (state.user?.activePublicKey) {
+          this.activePublicKey = state.user.activePublicKey;
+        }
+        this.changeDetectorRef.markForCheck();
+      });
   }
 
   ngOnDestroy() {
     this.getStateSubscription && this.getStateSubscription.unsubscribe();
-    this.getDictionarySubscription && this.getDictionarySubscription.unsubscribe();
+    this.getDictionarySubscription &&
+      this.getDictionarySubscription.unsubscribe();
   }
 
   getDictionary() {
-    this.stateRootHash && (this.getDictionarySubscription = this.deployerService.getDictionaryItem(this.stateRootHash, this.contractHash, this.dictionaryName, this.dictionaryItemKey, this.seedUref, this.apiUrl).subscribe(dict => {
-      dict && this.resultService.setResult<object>('Dictionnary', dict);
-      this.getDictionarySubscription.unsubscribe();
-    }));
+    this.stateRootHash &&
+      (this.getDictionarySubscription = this.deployerService
+        .getDictionaryItem(
+          this.stateRootHash,
+          this.contractHash,
+          this.dictionaryName,
+          this.dictionaryItemKey,
+          this.seedUref,
+          this.apiUrl,
+        )
+        .subscribe((dict) => {
+          dict && this.resultService.setResult<object>('Dictionnary', dict);
+          this.getDictionarySubscription.unsubscribe();
+        }));
   }
 
   get contractHash(): string {
@@ -77,7 +99,8 @@ export class DictionaryComponent implements AfterViewInit, OnDestroy {
 
   get isButtonDisabled(): boolean {
     const firstCondition = !this.dictionaryItemKey;
-    const secondCondition = !this.seedUref && (!this.dictionaryName || !this.contractHash);
+    const secondCondition =
+      !this.seedUref && (!this.dictionaryName || !this.contractHash);
     return firstCondition || secondCondition;
   }
 
@@ -90,7 +113,9 @@ export class DictionaryComponent implements AfterViewInit, OnDestroy {
   }
 
   setAccountBase64() {
-    const account_hash = new PublicKey(this.activePublicKey).toAccountHash().toFormattedString();
+    const account_hash = new PublicKey(this.activePublicKey)
+      .toAccountHash()
+      .toFormattedString();
     const base64 = this.deployer.account_hash_to_base64_encode(account_hash);
     base64 && (this.dictionaryItemKeyElt.nativeElement.value = base64);
   }
@@ -99,8 +124,10 @@ export class DictionaryComponent implements AfterViewInit, OnDestroy {
     if (!this.activePublicKey) {
       return;
     }
-    const account_hash = new PublicKey(this.activePublicKey).toAccountHash().toHexString();
-    this.dictionaryItemKeyElt.nativeElement.value = (account_hash) || '';
+    const account_hash = new PublicKey(this.activePublicKey)
+      .toAccountHash()
+      .toHexString();
+    this.dictionaryItemKeyElt.nativeElement.value = account_hash || '';
   }
 
   reset() {
