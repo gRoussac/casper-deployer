@@ -1,11 +1,11 @@
-<h1 style="text-align: center;"><a href="https://casperlabs.io/"><img src="https://raw.githubusercontent.com/gRoussac/casper-deployer-hackathon-oct-2022/dev/www/apps/frontend/src/assets/logo-dark.svg" width="120" style="position: relative; top:5px" alt="Casper"></a> <b>Deployer</b> - Information and How-To Guides</h1>
+<h1 style="text-align: center;"><a href="https://casperlabs.io/"><img src="https://raw.githubusercontent.com/gRoussac/casper-deployer/dev/www/apps/frontend/src/assets/logo.png" width="120" style="position: relative; top:5px" alt="Casper"></a> <b>Deployer</b> - Information and How-To Guides</h1>
 <br>
 
-# Welcome to **Project Casper Deployer**!
+# Welcome to **Casper Deployer**!
 
-# **[CasperLabs](https://casperlabs.io/)** Hackaton October 2022 👻 🎃🕯️
+# **Casper Blockchain** Hackaton Project October 2022 👻 🎃🕯️
 
-## **Project built with 😘♥💕❤ for Casper Blockchain** [![codecov](https://codecov.io/gh/gRoussac/casper-deployer-hackathon-oct-2022/branch/master/graph/badge.svg?token=3KWLVN3DPV)](https://codecov.io/gh/gRoussac/casper-deployer-hackathon-oct-2022/)
+## **Project built with 😘♥💕❤ for Casper Blockchain**
 
 ### 🏰 Deployed on [Render](https://render.com/) at [https://casper.onrender.com/ ](casper.onrender) ( beta 🏚️🕸️🕷️)
 
@@ -15,24 +15,18 @@
 
 #### This projects aims to ease interactions with <a href="https://casperlabs.io/"><img  style="position: relative; top:3px" alt="Casper" src="https://user-images.githubusercontent.com/3099551/197350250-b9d5852b-44a6-45bb-a227-e12d6d4166c9.jpg" height="20" width="20" alt="Casper"/> Casper Blockchain</a> during smart contracts development and for regular queries done with the [Casper Client CLI](https://github.com/casper-ecosystem/casper-client-rs)
 
-#### This project relies on [casper-js-sdk](https://github.com/casper-ecosystem/casper-js-sdk) and [casper-rust-sdk](https://github.com/casper-ecosystem/rustSDK) to help with onboarding developers on the Casper Network and also users by providing better insights on Casper Blockchain concepts (URef, Dictionnaries etc..) and with giving the ability to deploy a smart contract signed with the [Capser Signer](https://docs.casperlabs.io/workflow/signer-guide/).
+#### This project relies on [casper-rust-wasm-sdk](https://github.com/casper-ecosystem/casper-rust-wasm-sdk) to help with onboarding developers on the Casper Network and also users by providing better insights on Casper Blockchain concepts (URef, Dictionnaries etc..) and with giving the ability to deploy a smart contract signed with the [Capser Wallet](https://casperwallet.io).
 
 <br />
 <img alt="image" src="https://user-images.githubusercontent.com/3099551/197349529-ab5a899b-964f-4089-a6ad-84f059b9e50f.png">
 
 <hr><br />
 
-# ✍️ **Casper Signer**
+# ✍️ **Casper Wallet**
 
-> Using Chrome or a Chromium-based browser like Brave ? visit the Chrome Web Store, then download and install [CasperLabs Signer extension](https://chrome.google.com/webstore/detail/casper-signer/djhndpllfiibmcdbnmaaahkhchcoijce)
+> Using Chrome or a Chromium-based browser like Brave ? visit the Casper Wallet Web Store, then download and install [Casper Wallet extension](https://casperwallet.io)
 
-📜 CasperLabs Signer acts as your CSPR wallet, keeping your accounts and letting you sign deploys on the Casper Network to perform actions like staking, unstaking or sending your tokens to another person or an exchange account.
-
-### For Casper Signer Users
-
-- <img alt="Casper Signer" src="https://user-images.githubusercontent.com/3099551/197350250-b9d5852b-44a6-45bb-a227-e12d6d4166c9.jpg" alt="Casper Signer" width="20" style="vertical-align:middle"/> [Create/Import an Account using Signer](https://github.com/make-software/how-to-casperlabs/blob/master/docs/user-guides/SignerGuide.md)
-- 👛 [Connect a Wallet](https://github.com/make-software/how-to-casperlabs/blob/master/docs/user-guides/Connect-a-Wallet.md)
-- 💸 [Transfer CSPR](https://github.com/make-software/how-to-casperlabs/blob/master/docs/user-guides/Transfer-CSPR.md)
+📜 CasperLabs Wallet acts as your CSPR wallet, keeping your accounts and letting you sign deploys on the Casper Network to perform actions like staking, unstaking or sending your tokens to another person or an exchange account.
 
 #
 
@@ -104,7 +98,7 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
 
 ## Folders at root directory is as follow :
 
-- casper-sdk: contains the Casper Rust SDK in two versions, web and nodejs
+- casper-rust-wasm-sdk: contains the Casper Rust SDK in two versions, web and nodejs
 - docker: contains Docker files
 - wasm: contains client wasm files
 - www: contains the Web application files
@@ -114,7 +108,7 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
 # 🐙 **Features**
 
 - Header
-  - [✓] Integrate with Casper Signer
+  - [✓] Integrate with Casper Wallet
   - [✓] Display active public key and account balance
 - Network
   - [✓] Input Network Peer
@@ -124,7 +118,7 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
   - [✓] Retrieve Root State Hash
 - Config
   - [✓] Input Root State Hash
-  - [✓] Retrieve from Signer or input Public Key
+  - [✓] Retrieve from Wallet or input Public Key
   - [✓] Retrieve Puse URef associated with Public key
   - [✓] Retrieve Balance associated with Public key
 - Transfer
@@ -162,7 +156,7 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
   - [✓] Input Package version of the deploy
   - [✓] Make deploy
   - [🪲] (bugged) Speculative test deploy
-  - [✓] Sign with Signer and send deploy to network
+  - [✓] Sign with Wallet and send deploy to network
 - Output
   - [✓] Display active query results
 - Notes
@@ -173,10 +167,10 @@ Smart contracts are implemented in [Rust](https://www.rust-lang.org/) + [Casper 
 # 🛣️ Roadmap / Todo / Tofix
 
 - [✓] Add Dictionnary implementation to test smart contracts
-- [✓] Add some RPC calls into wasm client side (Rust SDK)
+- [✓] Add some RPC calls into wasm client side (Rust Wasm SDK)
 - [✓] Add Events watchers
-- [✓] Re implement Events watchers from the Rust SDK
-- [✓] Casper wallet integration / private key / deprecate Casper Signer
+- [✓] Re implement Events watchers from the Rust Wasm SDK
+- [✓] Casper Wallet integration / private key / deprecate Casper Signer
 - [✓] Fix Github workflow
 - [ ] Fix blur events on input
 - [ ] Fix UI height
@@ -351,15 +345,15 @@ Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
 
 ⚠️ Work in Progress
 
-https://github.com/gRoussac/casper-deployer-hackathon-oct-2022/blob/Development-Workflow
+https://github.com/gRoussac/casper-deployer/blob/Development-Workflow
 
 ### 📝 License
 
-[GNU GENERAL PUBLIC LICENSE](https://github.com/gRoussac/casper-deployer-hackathon-oct-2022/blob/master/LICENSE.md)
+[GNU GENERAL PUBLIC LICENSE](https://github.com/gRoussac/casper-deployer/blob/master/LICENSE.md)
 
 ### 🦺 Security
 
-https://github.com/gRoussac/casper-deployer-hackathon-oct-2022/blob/master/SECURITY.md
+https://github.com/gRoussac/casper-deployer/blob/master/SECURITY.md
 
 ### ❓Have questions?
 
