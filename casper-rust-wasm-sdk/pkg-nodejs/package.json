@@ -13,7 +13,7 @@
     "casper_rust_wasm_sdk.d.ts"
   ],
   "main": "casper_rust_wasm_sdk.js",
-  "homepage": "https://www.casper.network",
+  "homepage": "https://casper.network",
   "types": "casper_rust_wasm_sdk.d.ts",
   "keywords": [
     "casper",
