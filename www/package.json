@@ -59,7 +59,7 @@
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
     "@nestjs/schematics": "11.1.0",
-    "@nestjs/testing": "^11.1.28",
+    "@nestjs/testing": "^11.2.7",
     "@nx/cypress": "23.3.0",
     "@nx/eslint": "23.3.0",
     "@nx/eslint-plugin": "23.3.0",
