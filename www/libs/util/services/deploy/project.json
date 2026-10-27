@@ -5,10 +5,6 @@
   "prefix": "lib",
   "projectType": "library",
   "tags": [],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    }
-  }
+  "// targets": "to see all targets run: nx show project util-services-deploy --web",
+  "targets": {}
 }

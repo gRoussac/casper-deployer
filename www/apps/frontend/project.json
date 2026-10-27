@@ -108,9 +108,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/frontend/**/*.ts", "apps/frontend/**/*.html"]
+        "args": ["**/*.ts", "**/*.html"]
       }
     },
     "test": {

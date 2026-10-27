@@ -12,9 +12,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["libs/ui/tabs/**/*.ts", "libs/ui/tabs/**/*.html"]
+        "args": ["**/*.ts", "**/*.html"]
       }
     }
   }
