@@ -6,12 +6,8 @@
   "tags": ["util wasm"],
   "targets": {
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/util/services/wasm"],
       "options": {
-        "jestConfig": "libs/util/services/wasm/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "libs/util/services/wasm/tsconfig.spec.json"
+        "passWithNoTests": true
       }
     },
     "lint": {

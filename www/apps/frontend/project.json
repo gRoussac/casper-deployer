@@ -114,12 +114,8 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/frontend"],
       "options": {
-        "jestConfig": "apps/frontend/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "apps/frontend/tsconfig.spec.json"
+        "passWithNoTests": true
       }
     }
   }

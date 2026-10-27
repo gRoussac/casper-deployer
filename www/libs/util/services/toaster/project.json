@@ -7,12 +7,8 @@
   "tags": ["util toaster"],
   "targets": {
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/util/services/toaster"],
       "options": {
-        "jestConfig": "libs/util/services/toaster/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "libs/util/services/toaster/tsconfig.spec.json"
+        "passWithNoTests": true
       }
     },
     "lint": {

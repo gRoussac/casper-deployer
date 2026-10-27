@@ -30,6 +30,7 @@
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
     "@nx/angular": "24.0.2",
+    "@nx/jest": "^24.0.2",
     "casper-rust-wasm-sdk": "file:../casper-rust-wasm-sdk/pkg",
     "casper-rust-wasm-sdk-nodejs": "file:../casper-rust-wasm-sdk/pkg-nodejs",
     "ceps-client-wasm-schema": "file:../ceps-client-wasm-schema/pkg",
@@ -63,7 +64,6 @@
     "@nx/cypress": "24.0.2",
     "@nx/eslint": "24.0.2",
     "@nx/eslint-plugin": "24.0.2",
-    "@nx/jest": "24.0.2",
     "@nx/js": "24.0.2",
     "@nx/nest": "24.0.2",
     "@nx/node": "24.0.2",
@@ -101,11 +101,21 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "webpack-cli": "^7.2.3",
-    "webpack-dev-server": "6.1.0"
+    "webpack-dev-server": "^5.2.7"
   },
   "overrides": {
     "vite": "8.3.5",
     "undici": "8.12.3",
     "multer": "^2.5.0"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "@swc/core@1.16.20": true,
+    "cypress@16.2.0": true,
+    "esbuild@0.28.2": true,
+    "lmdb@3.5.6": true,
+    "msgpackr-extract@3.0.4": true,
+    "nx@24.0.2": true,
+    "unrs-resolver@1.12.2": true
   }
 }

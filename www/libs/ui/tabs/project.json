@@ -7,12 +7,8 @@
   "tags": [],
   "targets": {
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/ui/tabs"],
       "options": {
-        "jestConfig": "libs/ui/tabs/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "libs/ui/tabs/tsconfig.spec.json"
+        "passWithNoTests": true
       }
     },
     "lint": {
